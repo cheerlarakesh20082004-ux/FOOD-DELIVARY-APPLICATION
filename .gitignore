@@ -1,0 +1,17 @@
+node_modules/
+.vite/
+.DS_Store
+.idea/
+.vscode/
+*.log
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+target/
+build/
+
+# OS
+Thumbs.db
