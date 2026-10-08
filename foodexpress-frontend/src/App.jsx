@@ -1,10 +1,28 @@
-import { BrowserRouter, Routes, Route, NavLink } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, NavLink, Link, useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 import './App.css'
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 
 function AppLayout() {
+  const navigate = useNavigate()
+  const [user, setUser] = useState(null)
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('foodexpress_user')
+    if (storedUser) {
+      setUser(JSON.parse(storedUser))
+    }
+  }, [])
+
+  const handleLogout = () => {
+    localStorage.removeItem('foodexpress_token')
+    localStorage.removeItem('foodexpress_user')
+    setUser(null)
+    navigate('/')
+  }
+
   return (
     <>
       <header className="topbar">
@@ -15,23 +33,32 @@ function AppLayout() {
 
         <nav className="nav-links" aria-label="Main navigation">
           <NavLink to="/">Home</NavLink>
-          <NavLink to="/login">Login</NavLink>
-          <NavLink to="/register">Register</NavLink>
+          {!user && <NavLink to="/login">Login</NavLink>}
+          {!user && <NavLink to="/register">Register</NavLink>}
+          {user && <Link to="/">Hi, {user.fullName || user.email}</Link>}
         </nav>
 
         <div className="nav-actions">
-          <NavLink className="btn btn-light" to="/login">
-            Login
-          </NavLink>
-          <NavLink className="btn btn-primary" to="/register">
-            Sign Up
-          </NavLink>
+          {!user ? (
+            <>
+              <NavLink className="btn btn-light" to="/login">
+                Login
+              </NavLink>
+              <NavLink className="btn btn-primary" to="/register">
+                Sign Up
+              </NavLink>
+            </>
+          ) : (
+            <button className="btn btn-light" type="button" onClick={handleLogout}>
+              Logout
+            </button>
+          )}
         </div>
       </header>
 
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/login" element={<LoginPage />} />
+        <Route path="/login" element={<LoginPage onLoginSuccess={setUser} />} />
         <Route path="/register" element={<RegisterPage />} />
       </Routes>
     </>
